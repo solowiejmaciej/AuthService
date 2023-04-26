@@ -2,7 +2,9 @@ using AuthService;
 using AuthService.Entities;
 using AuthService.Middleware;
 using AuthService.Models;
+using AuthService.Models.Validation;
 using AuthService.Services;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -26,6 +28,7 @@ builder.Services.AddDbContext<UserDbContext>(options =>
 
 // Add services to the container.
 builder.Services.AddScoped<IJwtManager, JwtManager>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 //Middleware
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
@@ -35,6 +38,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddScoped<IValidator<UserBodyResponse>, UserBodyResponseValidation>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddLogging();
@@ -98,11 +102,11 @@ builder.Services.AddSingleton(jwtAppSettings);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
@@ -111,6 +115,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 SeedDatabase();
+
+app.MapHealthChecks("/health");
 
 app.Run();
 
