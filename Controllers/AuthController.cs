@@ -17,18 +17,10 @@ namespace AuthService.Controllers
         }
 
         [HttpPost("GetToken")]
-        public ActionResult GetToken(UserDto user)
+        public ActionResult GetToken(UserBodyResponse user)
         {
             var token = _jwtManager.GenerateJWT(user);
             return Ok(token);
-        }
-
-        [Authorize(Roles = "Admin")]
-        [HttpPost("AddNewUser")]
-        public ActionResult AddUser(UserDto user)
-        {
-            _jwtManager.AddNewUser(user);
-            return NoContent();
         }
     }
 }

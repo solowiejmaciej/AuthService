@@ -8,12 +8,12 @@ namespace AuthService
     public class Seeder
     {
         private readonly UserDbContext _dbContext;
-        private readonly IJwtManager _jwtManager;
+        private readonly IUserService _userService;
 
-        public Seeder(UserDbContext dbContext, IJwtManager jwtManager)
+        public Seeder(UserDbContext dbContext, IUserService userService)
         {
             _dbContext = dbContext;
-            _jwtManager = jwtManager;
+            _userService = userService;
         }
 
         public void Seed()
@@ -36,12 +36,12 @@ namespace AuthService
                 //To refactor while adding UserService
                 if (!_dbContext.Users.Any())
                 {
-                    var User = new UserDto()
+                    var User = new UserBodyResponse()
                     {
                         Login = "cwsuser",
                         Password = "string"
                     };
-                    _jwtManager.AddNewUser(User);
+                    _userService.AddAsync(User);
                     var createdUser = _dbContext.Users.FirstOrDefault(u => u.Login == User.Login);
                     createdUser.RoleId = 2;
                     _dbContext.SaveChanges();
