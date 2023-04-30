@@ -17,7 +17,7 @@ namespace AuthService.Controllers
         }
 
         [HttpPost("GetToken")]
-        public ActionResult GetToken(UserBodyResponse user)
+        public ActionResult GetToken(UserLoginBody user)
         {
             var token = _jwtManager.GenerateJWT(user);
             return Ok(token);

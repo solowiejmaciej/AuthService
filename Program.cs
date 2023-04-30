@@ -39,6 +39,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddScoped<IValidator<UserBodyResponse>, UserBodyResponseValidation>();
+builder.Services.AddScoped<IValidator<UserLoginBody>, UserLoginBodyValidation>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddLogging();
