@@ -14,7 +14,7 @@ namespace AuthService.Services;
 
 public interface IJwtManager
 {
-    TokenResponse GenerateJWT(UserBodyResponse user);
+    TokenResponse GenerateJWT(UserLoginBody user);
 }
 
 public class JwtManager : IJwtManager
@@ -30,7 +30,7 @@ public class JwtManager : IJwtManager
         _passwordHasher = passwordHasher;
     }
 
-    public TokenResponse GenerateJWT(UserBodyResponse dto)
+    public TokenResponse GenerateJWT(UserLoginBody dto)
     {
         var user = _dbcontext.Users
                     .Include(u => u.Role)
