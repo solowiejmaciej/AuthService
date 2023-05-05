@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AuthService.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
@@ -23,7 +23,7 @@ namespace AuthService.Controllers
         // GET: User/5
 
         [HttpGet("{Id}")]
-        public UserDto GetById(int Id)
+        public UserDto GetById(string Id)
         {
             return _userService.GetById(Id);
         }
@@ -48,7 +48,7 @@ namespace AuthService.Controllers
         // Delete: User/5
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
+        public ActionResult Delete(string id)
         {
             _userService.DeleteAsync(id);
             return NoContent();

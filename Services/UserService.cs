@@ -9,13 +9,13 @@ namespace AuthService.Services
 {
     public interface IUserService
     {
-        UserDto GetById(int id);
+        UserDto GetById(string id);
 
         Task<List<UserDto>> GetAll();
 
-        Task DeleteAsync(int id);
+        Task DeleteAsync(string id);
 
-        Task<int> AddAsync(UserBodyResponse userDto);
+        Task<string> AddAsync(UserBodyResponse userDto);
     }
 
     public class UserService : IUserService
@@ -23,9 +23,9 @@ namespace AuthService.Services
         private readonly UserDbContext _dbContext;
         private readonly ILogger<UserService> _logger;
         private readonly IMapper _mapper;
-        private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IPasswordHasher<IdentityUser> _passwordHasher;
 
-        public UserService(UserDbContext dbContext, ILogger<UserService> logger, IMapper mapper, IPasswordHasher<User> passwordHasher)
+        public UserService(UserDbContext dbContext, ILogger<UserService> logger, IMapper mapper, IPasswordHasher<IdentityUser> passwordHasher)
         {
             _dbContext = dbContext;
             _logger = logger;
@@ -33,9 +33,9 @@ namespace AuthService.Services
             _passwordHasher = passwordHasher;
         }
 
-        private User GetUserFromDb(int id)
+        private IdentityUser GetUserFromDb(string id)
         {
-            var user = _dbContext.Users.FirstOrDefault(x => x.Id == id);
+            var user = _dbContext.Users.FirstOrDefault(x => x.Id.Equals(id));
             if (user == null)
             {
                 throw new NotFoundException($"User with {id} not found");
@@ -43,38 +43,85 @@ namespace AuthService.Services
             return user;
         }
 
-        public UserDto GetById(int id)
+        private string GetRoleIdByUserId(string userId)
+        {
+            return _dbContext.UserRoles.FirstOrDefault(r => r.UserId == userId).RoleId;
+        }
+
+        private string GetRoleNameByRoleId(string roleId)
+        {
+            return _dbContext.Roles.FirstOrDefault(r => r.Id == roleId).Name;
+        }
+
+        private List<UserDto> GetUsersWithRoles(List<IdentityUser> users)
+        {
+            List<UserDto> usersDtos = new List<UserDto>();
+            foreach (var user in users)
+            {
+                var roleId = GetRoleIdByUserId(user.Id);
+                var roleName = GetRoleNameByRoleId(roleId);
+                usersDtos.Add(new UserDto
+                {
+                    Id = user.Id,
+                    RoleId = roleId,
+                    RoleName = roleName,
+                    Email = user.Email
+                });
+            }
+
+            return usersDtos;
+        }
+
+        public UserDto GetById(string id)
         {
             var user = GetUserFromDb(id);
-            var userDto = _mapper.Map<UserDto>(user);
+            var roleId = GetRoleIdByUserId(user.Id);
+            var roleName = GetRoleNameByRoleId(roleId);
+            var userDto = new UserDto
+            {
+                Id = user.Id,
+                RoleId = roleId,
+                RoleName = roleName,
+                Email = user.Email
+            };
             return userDto;
         }
 
         public async Task<List<UserDto>> GetAll()
         {
             var allUsers = await _dbContext.Users.ToListAsync();
-            var allUsersDtos = _mapper.Map<List<UserDto>>(allUsers);
+            var allUsersDtos = GetUsersWithRoles(allUsers);
             return allUsersDtos;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(string id)
         {
             var userToDelete = GetUserFromDb(id);
             _dbContext.Users.Remove(userToDelete);
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<int> AddAsync(UserBodyResponse userBodyResponse)
+        public async Task<string> AddAsync(UserBodyResponse userBodyResponse)
         {
-            var newUser = new User
+            var newUser = new IdentityUser
             {
-                Login = userBodyResponse.Login
+                Email = userBodyResponse.Email,
+                UserName = userBodyResponse.Email,
+                NormalizedEmail = userBodyResponse.Email.ToUpper(),
+                NormalizedUserName = userBodyResponse.Email.ToUpper()
             };
 
             var hashedPass = _passwordHasher.HashPassword(newUser, userBodyResponse.Password);
-            newUser.PasswordHashed = hashedPass;
+            newUser.PasswordHash = hashedPass;
 
             var userInDb = await _dbContext.Users.AddAsync(newUser);
+            var userRoleId = _dbContext.Roles.FirstOrDefault(r => r.Name == "User").Id;
+            _dbContext.UserRoles.AddAsync(new()
+            {
+                RoleId = userRoleId,
+                UserId = userInDb.Entity.Id
+            });
+
             await _dbContext.SaveChangesAsync();
 
             return userInDb.Entity.Id;

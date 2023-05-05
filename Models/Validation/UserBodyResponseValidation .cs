@@ -7,14 +7,14 @@ namespace AuthService.Models.Validation
     {
         public UserBodyResponseValidation(UserDbContext dbContext)
         {
-            RuleFor(u => u.Login)
+            RuleFor(u => u.Email)
                 .NotEmpty();
             RuleFor(u => u.Password)
                 .NotEmpty();
-            RuleFor(x => x.Login).Custom(
+            RuleFor(x => x.Email).Custom(
                 (value, context) =>
                 {
-                    var loginInUse = dbContext.Users.Any(u => u.Login == value);
+                    var loginInUse = dbContext.Users.Any(u => u.Email == value);
 
                     if (loginInUse)
                     {

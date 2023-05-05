@@ -7,5 +7,6 @@
         public DateTime IssuedDate { get; set; }
         public DateTime ExpiresAt { get; set; }
         public string Role { get; set; }
+        public string RoleId { get; set; }
     }
 }

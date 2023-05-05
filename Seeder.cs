@@ -16,6 +16,7 @@ namespace AuthService
             _userService = userService;
         }
 
+        //To Refactor to work with ms identity
         public void Seed()
         {
             if (_dbContext.Database.CanConnect())
@@ -29,8 +30,8 @@ namespace AuthService
 
                 if (!_dbContext.Roles.Any())
                 {
-                    var roles = GetRoles();
-                    _dbContext.Roles.AddRange(roles);
+                    //var roles = GetRoles();
+                    //_dbContext.Roles.AddRange(roles);
                     _dbContext.SaveChanges();
                 }
                 //To refactor while adding UserService
@@ -38,32 +39,15 @@ namespace AuthService
                 {
                     var User = new UserBodyResponse()
                     {
-                        Login = "cwsuser",
+                        Email = "cwsuser",
                         Password = "string"
                     };
                     _userService.AddAsync(User);
-                    var createdUser = _dbContext.Users.FirstOrDefault(u => u.Login == User.Login);
-                    createdUser.RoleId = 2;
+                    var createdUser = _dbContext.Users.FirstOrDefault(u => u.Email == User.Email);
+                    //createdUser.RoleId = 2;
                     _dbContext.SaveChanges();
                 }
             }
-        }
-
-        private IEnumerable<Role> GetRoles()
-        {
-            var roles = new List<Role>()
-            {
-                new ()
-                {
-                    Name = "User"
-                },
-                new ()
-                {
-                    Name = "Admin"
-                }
-            };
-
-            return roles;
         }
     }
 }
