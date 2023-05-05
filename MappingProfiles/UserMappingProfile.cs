@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AuthService.Entities;
 using AuthService.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace UserMappingProfiles
 {
@@ -8,8 +9,8 @@ namespace UserMappingProfiles
     {
         public UserMappingProfile()
         {
-            CreateMap<UserDto, User>();
-            CreateMap<User, UserDto>();
+            CreateMap<UserDto, IdentityUser>();
+            CreateMap<IdentityUser, UserDto>();
         }
     }
 }

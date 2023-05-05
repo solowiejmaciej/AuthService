@@ -7,7 +7,7 @@ namespace AuthService.Models.Validation
     {
         public UserLoginBodyValidation()
         {
-            RuleFor(u => u.Login)
+            RuleFor(u => u.Email)
                 .NotEmpty();
             RuleFor(u => u.Password)
                 .NotEmpty();

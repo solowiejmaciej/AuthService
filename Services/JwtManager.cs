@@ -20,10 +20,10 @@ public interface IJwtManager
 public class JwtManager : IJwtManager
 {
     private UserDbContext _dbcontext { get; }
-    private IPasswordHasher<User> _passwordHasher { get; }
+    private IPasswordHasher<IdentityUser> _passwordHasher { get; }
     private JwtAppSettings _jwtAppSettings { get; }
 
-    public JwtManager(UserDbContext dbcontext, IPasswordHasher<User> passwordHasher, JwtAppSettings jwtSettings)
+    public JwtManager(UserDbContext dbcontext, IPasswordHasher<IdentityUser> passwordHasher, JwtAppSettings jwtSettings)
     {
         _jwtAppSettings = jwtSettings;
         _dbcontext = dbcontext;
@@ -32,14 +32,13 @@ public class JwtManager : IJwtManager
 
     public TokenResponse GenerateJWT(UserLoginBody dto)
     {
-        var user = _dbcontext.Users
-                    .Include(u => u.Role)
-                    .FirstOrDefault(x => x.Login == dto.Login);
+        var user = _dbcontext.Users.FirstOrDefault(x => x.Email == dto.Email);
         if (user is null)
         {
             throw new BadRequestException("Invalid username or password");
         }
-        var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHashed, dto.Password);
+
+        var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
 
         if (result == PasswordVerificationResult.Failed)
         {
@@ -48,11 +47,14 @@ public class JwtManager : IJwtManager
 
         var expires = DateTime.UtcNow.AddDays(_jwtAppSettings.JwtExpireDays);
 
+        var userRoleId = _dbcontext.UserRoles.FirstOrDefault(r => r.UserId == user.Id).RoleId;
+        var userRoleName = _dbcontext.Roles.FirstOrDefault(r => r.Id == userRoleId).Name;
+
         var claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Login),
-                new Claim(ClaimTypes.Role, $"{user.Role.Name}")
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.Email),
+                new Claim(ClaimTypes.Role, $"{userRoleName}")
             };
 
         string rsaPrivateKey = File.ReadAllText(@"certi\privateKey.pem");
@@ -78,7 +80,8 @@ public class JwtManager : IJwtManager
             StatusCode = 200,
             IssuedDate = DateTime.UtcNow,
             ExpiresAt = expires,
-            Role = user.Role.Name
+            Role = userRoleName,
+            RoleId = userRoleId
         };
 
         return response;

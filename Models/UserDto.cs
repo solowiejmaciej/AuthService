@@ -4,9 +4,9 @@ namespace AuthService.Models
 {
     public class UserDto
     {
-        public int Id { get; set; }
-        public string Login { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public int? RoleId { get; set; }
+        public string Id { get; set; }
+        public string Email { get; set; }
+        public string? RoleId { get; set; }
+        public string RoleName { get; set; }
     }
 }
