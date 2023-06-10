@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuthService.Entities
 {
-    public class UserDbContext : IdentityDbContext
+    public class UserDbContext : IdentityDbContext<ApplicationUser>
     {
         public UserDbContext(DbContextOptions<UserDbContext> options) : base(options)
         {

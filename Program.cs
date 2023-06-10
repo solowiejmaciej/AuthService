@@ -1,50 +1,15 @@
 using AuthService;
-using AuthService.Entities;
 using AuthService.Middleware;
-using AuthService.Models;
-using AuthService.Models.Validation;
-using AuthService.Services;
-using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Security.Cryptography;
+using AuthService.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
-var configuration = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json")
-    .Build();
-
-var jwtAppSettings = new JwtAppSettings();
-configuration.GetSection("Auth").Bind(jwtAppSettings);
-
-builder.Services.AddDbContext<UserDbContext>(options =>
-{
-    options.UseSqlServer(configuration.GetConnectionString("App"));
-});
-
-// Add services to the container.
-builder.Services.AddScoped<IJwtManager, JwtManager>();
-builder.Services.AddScoped<IUserService, UserService>();
-
-//Middleware
+builder.Services.AddAuthService();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
-
-builder.Services.AddControllers();
-
-builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddScoped<IValidator<UserBodyResponse>, UserBodyResponseValidation>();
-builder.Services.AddScoped<IValidator<UserLoginBody>, UserLoginBodyValidation>();
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-builder.Services.AddScoped<IPasswordHasher<IdentityUser>, PasswordHasher<IdentityUser>>();
 builder.Services.AddLogging();
-builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
-
 builder.Services.AddHealthChecks();
 
 builder.Services.AddSwaggerGen(c =>
@@ -74,33 +39,8 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.AddAuthentication(option =>
-{
-    option.DefaultAuthenticateScheme = "Bearer";
-    option.DefaultScheme = "Bearer";
-    option.DefaultChallengeScheme = "Bearer";
-}).AddJwtBearer(cfg =>
-{
-    RSA rsa = RSA.Create();
-    rsa.ImportSubjectPublicKeyInfo(
-        source: Convert.FromBase64String(jwtAppSettings.JwtPublicKey),
-        bytesRead: out int _
-    );
-    cfg.RequireHttpsMetadata = false;
-    cfg.SaveToken = true;
-    cfg.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidIssuer = jwtAppSettings.JwtIssuer,
-        ValidAudience = jwtAppSettings.JwtIssuer,
-        IssuerSigningKey = new RsaSecurityKey(rsa),
-    };
-});
-
-builder.Services.AddScoped<Seeder>();
-
-builder.Services.AddSingleton(jwtAppSettings);
-
 var app = builder.Build();
+app.UseCors("apiCorsPolicy"); // allow credentials
 
 // Configure the HTTP request pipeline.
 

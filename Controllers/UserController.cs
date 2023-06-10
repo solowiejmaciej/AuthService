@@ -3,12 +3,14 @@ using AuthService.Exceptions;
 using AuthService.Models;
 using AuthService.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthService.Controllers
 {
     //[Authorize]
+    [EnableCors("apiCorsPolicy")]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
