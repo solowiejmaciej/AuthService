@@ -2,13 +2,11 @@
 using AuthService.Exceptions;
 using AuthService.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
-
-using AuthService.Models;
+using AuthService.Extensions;
 
 namespace AuthService.Services;
 
@@ -20,10 +18,10 @@ public interface IJwtManager
 public class JwtManager : IJwtManager
 {
     private UserDbContext _dbcontext { get; }
-    private IPasswordHasher<IdentityUser> _passwordHasher { get; }
-    private JwtAppSettings _jwtAppSettings { get; }
+    private IPasswordHasher<ApplicationUser> _passwordHasher { get; }
+    private ServiceCollectionExtension.JwtAppSettings _jwtAppSettings { get; }
 
-    public JwtManager(UserDbContext dbcontext, IPasswordHasher<IdentityUser> passwordHasher, JwtAppSettings jwtSettings)
+    public JwtManager(UserDbContext dbcontext, IPasswordHasher<ApplicationUser> passwordHasher, ServiceCollectionExtension.JwtAppSettings jwtSettings)
     {
         _jwtAppSettings = jwtSettings;
         _dbcontext = dbcontext;

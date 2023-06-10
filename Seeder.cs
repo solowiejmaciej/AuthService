@@ -39,8 +39,8 @@ namespace AuthService
                 {
                     var User = new UserBodyResponse()
                     {
-                        Email = "cwsuser",
-                        Password = "string"
+                        Email = "solowiejmaciej@gmail.com",
+                        Password = "zaq1@WSX"
                     };
                     _userService.AddAsync(User);
                     var createdUser = _dbContext.Users.FirstOrDefault(u => u.Email == User.Email);

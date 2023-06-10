@@ -23,9 +23,9 @@ namespace AuthService.Services
         private readonly UserDbContext _dbContext;
         private readonly ILogger<UserService> _logger;
         private readonly IMapper _mapper;
-        private readonly IPasswordHasher<IdentityUser> _passwordHasher;
+        private readonly IPasswordHasher<ApplicationUser> _passwordHasher;
 
-        public UserService(UserDbContext dbContext, ILogger<UserService> logger, IMapper mapper, IPasswordHasher<IdentityUser> passwordHasher)
+        public UserService(UserDbContext dbContext, ILogger<UserService> logger, IMapper mapper, IPasswordHasher<ApplicationUser> passwordHasher)
         {
             _dbContext = dbContext;
             _logger = logger;
@@ -33,7 +33,7 @@ namespace AuthService.Services
             _passwordHasher = passwordHasher;
         }
 
-        private IdentityUser GetUserFromDb(string id)
+        private ApplicationUser GetUserFromDb(string id)
         {
             var user = _dbContext.Users.FirstOrDefault(x => x.Id.Equals(id));
             if (user == null)
@@ -45,21 +45,37 @@ namespace AuthService.Services
 
         private string GetRoleIdByUserId(string userId)
         {
-            return _dbContext.UserRoles.FirstOrDefault(r => r.UserId == userId).RoleId;
+            try
+            {
+                return _dbContext.UserRoles.FirstOrDefault(r => r.UserId == userId).RoleId;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation(ex.Message);
+                return null;
+            }
         }
 
         private string GetRoleNameByRoleId(string roleId)
         {
-            return _dbContext.Roles.FirstOrDefault(r => r.Id == roleId).Name;
+            try
+            {
+                return _dbContext.Roles.FirstOrDefault(r => r.Id == roleId).Name;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation(ex.Message);
+                return null;
+            }
         }
 
-        private List<UserDto> GetUsersWithRoles(List<IdentityUser> users)
+        private List<UserDto> GetUsersWithRoles(List<ApplicationUser> users)
         {
             List<UserDto> usersDtos = new List<UserDto>();
             foreach (var user in users)
             {
-                var roleId = GetRoleIdByUserId(user.Id);
-                var roleName = GetRoleNameByRoleId(roleId);
+                string? roleId = GetRoleIdByUserId(user.Id);
+                string? roleName = GetRoleNameByRoleId(roleId);
                 usersDtos.Add(new UserDto
                 {
                     Id = user.Id,
@@ -82,7 +98,8 @@ namespace AuthService.Services
                 Id = user.Id,
                 RoleId = roleId,
                 RoleName = roleName,
-                Email = user.Email
+                Email = user.Email,
+                DeviceId = user.DeviceId,
             };
             return userDto;
         }
@@ -103,7 +120,7 @@ namespace AuthService.Services
 
         public async Task<string> AddAsync(UserBodyResponse userBodyResponse)
         {
-            var newUser = new IdentityUser
+            var newUser = new ApplicationUser
             {
                 Email = userBodyResponse.Email,
                 UserName = userBodyResponse.Email,
