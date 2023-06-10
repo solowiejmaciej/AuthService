@@ -14,13 +14,6 @@ using System.Security.Cryptography;
 
 public static class ServiceCollectionExtension
 {
-    public class JwtAppSettings
-    {
-        public string JwtPublicKey { get; set; }
-        public int JwtExpireDays { get; set; }
-        public string JwtIssuer { get; set; }
-    }
-
     public static void AddAuthService(this IServiceCollection services)
     {
         var configuration = new ConfigurationBuilder()
