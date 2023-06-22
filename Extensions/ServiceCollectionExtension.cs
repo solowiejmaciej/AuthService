@@ -14,13 +14,6 @@ using System.Security.Cryptography;
 
 public static class ServiceCollectionExtension
 {
-    public class JwtAppSettings
-    {
-        public string JwtPublicKey { get; set; }
-        public int JwtExpireDays { get; set; }
-        public string JwtIssuer { get; set; }
-    }
-
     public static void AddAuthService(this IServiceCollection services)
     {
         var configuration = new ConfigurationBuilder()
@@ -81,8 +74,9 @@ public static class ServiceCollectionExtension
             cfg.SaveToken = true;
             cfg.TokenValidationParameters = new TokenValidationParameters
             {
-                ValidIssuer = jwtAppSettings.JwtIssuer,
-                ValidAudience = jwtAppSettings.JwtIssuer,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+
                 IssuerSigningKey = new RsaSecurityKey(rsa),
             };
         });

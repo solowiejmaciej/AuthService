@@ -10,16 +10,14 @@ namespace AuthService.Services
     public class DeviceService : IDeviceService
     {
         private readonly UserDbContext _dbContext;
-        private readonly ILogger<UserService> _logger;
+        private readonly ILogger<DeviceService> _logger;
         private readonly IUserContext _userContext;
-        private readonly IMapper _mapper;
 
-        public DeviceService(UserDbContext dbContext, ILogger<UserService> logger, IUserContext userContext, IMapper mapper)
+        public DeviceService(UserDbContext dbContext, ILogger<DeviceService> logger, IUserContext userContext)
         {
             _dbContext = dbContext;
             _logger = logger;
             _userContext = userContext;
-            _mapper = mapper;
         }
 
         public async Task AssignDeviceIdToUserAsync(string deviceId)
