@@ -22,14 +22,12 @@ namespace AuthService.Services
     {
         private readonly UserDbContext _dbContext;
         private readonly ILogger<UserService> _logger;
-        private readonly IMapper _mapper;
         private readonly IPasswordHasher<ApplicationUser> _passwordHasher;
 
-        public UserService(UserDbContext dbContext, ILogger<UserService> logger, IMapper mapper, IPasswordHasher<ApplicationUser> passwordHasher)
+        public UserService(UserDbContext dbContext, ILogger<UserService> logger, IPasswordHasher<ApplicationUser> passwordHasher)
         {
             _dbContext = dbContext;
             _logger = logger;
-            _mapper = mapper;
             _passwordHasher = passwordHasher;
         }
 
@@ -81,10 +79,10 @@ namespace AuthService.Services
                     Id = user.Id,
                     RoleId = roleId,
                     RoleName = roleName,
-                    Email = user.Email
+                    Email = user.Email,
+                    DeviceId = user.DeviceId,
                 });
             }
-
             return usersDtos;
         }
 

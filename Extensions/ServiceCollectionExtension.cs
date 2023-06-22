@@ -74,8 +74,9 @@ public static class ServiceCollectionExtension
             cfg.SaveToken = true;
             cfg.TokenValidationParameters = new TokenValidationParameters
             {
-                ValidIssuer = jwtAppSettings.JwtIssuer,
-                ValidAudience = jwtAppSettings.JwtIssuer,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+
                 IssuerSigningKey = new RsaSecurityKey(rsa),
             };
         });
