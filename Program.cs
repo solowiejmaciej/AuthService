@@ -10,7 +10,6 @@ builder.Services.AddAuthService();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddLogging();
-builder.Services.AddHealthChecks();
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -56,8 +55,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 SeedDatabase();
-
-app.MapHealthChecks("/health");
 
 app.Run();
 

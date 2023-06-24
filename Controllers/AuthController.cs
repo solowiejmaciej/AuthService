@@ -11,18 +11,24 @@ namespace AuthService.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private IJwtManager _jwtManager;
+        private readonly IJwtManager _jwtManager;
 
         public AuthController(IJwtManager jwtManager)
         {
             _jwtManager = jwtManager;
         }
 
-        [HttpPost("GetToken")]
+        [HttpPost("Login")]
         public ActionResult GetToken(UserLoginBody user)
         {
             var token = _jwtManager.GenerateJWT(user);
             return Ok(token);
+        }
+
+        [HttpPost("Login/QR")]
+        public ActionResult LoginViaQr()
+        {
+            throw new NotImplementedException();
         }
     }
 }
