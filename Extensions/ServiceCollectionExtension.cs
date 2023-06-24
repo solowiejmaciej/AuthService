@@ -20,9 +20,11 @@ public static class ServiceCollectionExtension
             .AddJsonFile("appsettings.json")
             .Build();
 
-        var jwtAppSettings = new JwtAppSettings();
-        configuration.GetSection("Auth").Bind(jwtAppSettings);
-        services.AddSingleton<JwtAppSettings>();
+        JwtAppSettings jwtConfig = new JwtAppSettings();
+        var jwtAppSettings = configuration.GetSection("Auth");
+        jwtAppSettings.Bind(jwtConfig);
+
+        services.Configure<JwtAppSettings>(jwtAppSettings);
 
         services.AddDbContext<UserDbContext>(options =>
         {
@@ -67,7 +69,7 @@ public static class ServiceCollectionExtension
         {
             RSA rsa = RSA.Create();
             rsa.ImportSubjectPublicKeyInfo(
-                source: Convert.FromBase64String(jwtAppSettings.JwtPublicKey),
+                source: Convert.FromBase64String(jwtConfig.JwtPublicKey),
                 bytesRead: out int _
             );
             cfg.RequireHttpsMetadata = false;

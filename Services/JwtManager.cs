@@ -2,6 +2,7 @@
 using AuthService.Exceptions;
 using AuthService.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -18,11 +19,11 @@ public class JwtManager : IJwtManager
 {
     private UserDbContext _dbcontext { get; }
     private IPasswordHasher<ApplicationUser> _passwordHasher { get; }
-    private JwtAppSettings _jwtAppSettings { get; }
+    private IOptions<JwtAppSettings> _jwtAppSettings { get; }
 
-    public JwtManager(UserDbContext dbcontext, IPasswordHasher<ApplicationUser> passwordHasher, JwtAppSettings jwtSettings)
+    public JwtManager(UserDbContext dbcontext, IPasswordHasher<ApplicationUser> passwordHasher, IOptions<JwtAppSettings> config)
     {
-        _jwtAppSettings = jwtSettings;
+        _jwtAppSettings = config;
         _dbcontext = dbcontext;
         _passwordHasher = passwordHasher;
     }
@@ -42,7 +43,7 @@ public class JwtManager : IJwtManager
             throw new BadRequestException("Invalid username or password");
         }
 
-        var expires = DateTime.UtcNow.AddDays(_jwtAppSettings.JwtExpireDays);
+        var expires = DateTime.Now.AddMinutes(_jwtAppSettings.Value.JwtExpireMinutes);
 
         var userRoleId = _dbcontext.UserRoles.FirstOrDefault(r => r.UserId == user.Id).RoleId;
         var userRoleName = _dbcontext.Roles.FirstOrDefault(r => r.Id == userRoleId).Name;
@@ -64,8 +65,8 @@ public class JwtManager : IJwtManager
         };
 
         var jwt = new JwtSecurityToken(
-            audience: _jwtAppSettings.JwtIssuer,
-            issuer: _jwtAppSettings.JwtIssuer,
+            audience: _jwtAppSettings.Value.JwtIssuer,
+            issuer: _jwtAppSettings.Value.JwtIssuer,
             claims: claims,
             expires: expires,
             signingCredentials: signingCredentials
@@ -75,10 +76,11 @@ public class JwtManager : IJwtManager
         {
             Token = new JwtSecurityTokenHandler().WriteToken(jwt),
             StatusCode = 200,
-            IssuedDate = DateTime.UtcNow,
+            IssuedDate = DateTime.Now,
             ExpiresAt = expires,
             Role = userRoleName,
-            RoleId = userRoleId
+            RoleId = userRoleId,
+            UserId = user.Id
         };
 
         return response;
