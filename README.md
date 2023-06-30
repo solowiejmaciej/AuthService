@@ -8,12 +8,15 @@ This API allows users to obtain JWT signed with certificate
 
 ###### POST /api/Auth/Login/QR
 
-###### POST /api/Auth/AddNewUser 
+###### POST /api/User/ 
+###### DELETE /api/User/{id} 
+###### GET /api/User/
+###### GET /api/User/{id} 
 
 
 ## Add API user
 
-##### POST /api/Auth/AddNewUser Only for users with Admin Role
+##### POST /api/User Only for users with Admin Role
 
 ###### Adds a new API user to the database. The request must include a JSON object in the body with the following fields:  
 ```json
@@ -46,6 +49,48 @@ This API allows users to obtain JWT signed with certificate
   "expiresAt": "2024-04-24T18:41:26.6371061Z",
   "userId": "903d0cb2-cddf-4c26-acf8-83eb36abc4b3",
   "role": "Admin"
+}
+```
+
+## Delete User
+
+##### DELETE /api/User/{id} 
+###### Allows an API user to delete user with provided Id
+
+## Get User
+
+##### GET /api/User/
+###### Returns all of the users
+
+## Response
+```json
+[
+  {
+    "id": 0,
+    "login": "string",
+    "createdAt": "2023-04-26T22:26:12.788Z",
+    "roleId": 0
+  },
+    {
+    "id": 1,
+    "login": "string",
+    "createdAt": "2023-04-26T22:26:12.788Z",
+    "roleId": 0
+  }
+]
+```
+
+## Get User by Id
+
+##### GET /api/User/{id} 
+###### Allows an API user to get specific user with provided Id
+## Response
+```json
+{
+  "id": 0,
+  "login": "string",
+  "createdAt": "2023-04-26T22:27:35.893Z",
+  "roleId": 0
 }
 ```
 
