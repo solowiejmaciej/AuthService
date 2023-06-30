@@ -4,7 +4,9 @@ This API allows users to obtain JWT signed with certificate
 
 ## Endpoints
 
-###### POST /api/Auth/GetToken
+###### POST /api/Auth/Login
+
+###### POST /api/Auth/Login/QR
 
 ###### POST /api/Auth/AddNewUser 
 
@@ -23,7 +25,7 @@ This API allows users to obtain JWT signed with certificate
 
 ## User Login
 
-##### POST /api/Auth/GetToken
+##### POST /api/Auth/Login
 
 ###### Allows an API user to obtain a JWT token for API usage. The request must include a JSON object in the body with the following fields:
 
@@ -42,6 +44,7 @@ This API allows users to obtain JWT signed with certificate
   "statusCode": 200,
   "issuedDate": "2023-04-25T18:41:26.7311955Z",
   "expiresAt": "2024-04-24T18:41:26.6371061Z",
+  "userId": "903d0cb2-cddf-4c26-acf8-83eb36abc4b3",
   "role": "Admin"
 }
 ```
